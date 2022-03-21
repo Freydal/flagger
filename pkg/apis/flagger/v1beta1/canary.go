@@ -86,7 +86,7 @@ type CanarySpec struct {
 	UpstreamRef *CrossNamespaceObjectReference `json:"upstreamRef,omitempty"`
 
 	// Service defines how ClusterIP services, service mesh or ingress routing objects are generated
-	Service CanaryService `json:"service"`
+	Service CanaryService `json:"service,omitempty"`
 
 	// Analysis defines the validation process of a release
 	Analysis *CanaryAnalysis `json:"analysis,omitempty"`
