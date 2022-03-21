@@ -23,6 +23,21 @@ import (
 // KubernetesNoopRouter manages nothing. This is useful when one uses Flagger for progressive delivery of
 // services that are not load-balanced by a Kubernetes service
 type KubernetesNoopRouter struct {
+	primaryWeight int
+	canaryWeight int
+	mirrored bool
+}
+
+func (c *KubernetesNoopRouter) SetRoutes(_ *flaggerv1.Canary, pw int, cw int, m bool) error {
+	c.primaryWeight = pw
+	c.canaryWeight = cw
+	c.mirrored = m
+
+	return nil
+}
+
+func (c *KubernetesNoopRouter) GetRoutes(_ *flaggerv1.Canary) (primaryWeight int, canaryWeight int, mirrored bool, err error) {
+	return c.primaryWeight, c.canaryWeight, c.mirrored, nil
 }
 
 func (c *KubernetesNoopRouter) Initialize(_ *flaggerv1.Canary) error {

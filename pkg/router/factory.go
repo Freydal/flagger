@@ -185,6 +185,8 @@ func (factory *Factory) MeshRouter(provider string, labelSelector string) Interf
 		}
 	case provider == flaggerv1.KubernetesProvider:
 		return &NopRouter{}
+	case provider == flaggerv1.NoneProvider:
+		return &KubernetesNoopRouter{}
 	default:
 		return &IstioRouter{
 			logger:        factory.logger,

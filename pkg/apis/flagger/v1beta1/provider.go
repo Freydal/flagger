@@ -14,4 +14,5 @@ const (
 	OsmProvider        string = "osm"
 	KumaProvider       string = "kuma"
 	GatewayAPIProvider string = "gatewayapi"
+	NoneProvider       string = "none"
 )
