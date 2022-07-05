@@ -339,6 +339,7 @@ func HandleNewTask(logger *zap.SugaredLogger, taskRunner TaskRunnerInterface, au
 			if typ == TaskTypeHelmv3 || typ == TaskTypeHelm {
 				helm := HelmTaskv3{
 					command:      payload.Metadata["cmd"],
+					status:       payload.Metadata["status"],
 					logCmdOutput: true,
 					TaskBase: TaskBase{
 						canary: fmt.Sprintf("%s.%s", payload.Name, payload.Namespace),

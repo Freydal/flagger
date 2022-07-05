@@ -28,6 +28,7 @@ const TaskTypeHelm = "helm"
 
 type HelmTaskv3 struct {
 	TaskBase
+	status       string
 	command      string
 	logCmdOutput bool
 }
@@ -37,6 +38,12 @@ func (task *HelmTaskv3) Hash() string {
 }
 
 func (task *HelmTaskv3) Run(ctx context.Context) (*TaskRunResult, error) {
+	if task.status != "" {
+		if out, err := task.checkStatus(ctx); err != nil {
+			return out, fmt.Errorf("command %s failed: %s: %w", task.status, out, err)
+		}
+	}
+
 	helmCmd := fmt.Sprintf("%s %s", TaskTypeHelmv3, task.command)
 	task.logger.With("canary", task.canary).Infof("running command %v", helmCmd)
 
@@ -51,6 +58,29 @@ func (task *HelmTaskv3) Run(ctx context.Context) (*TaskRunResult, error) {
 		}
 		task.logger.With("canary", task.canary).Infof("command finished %v", helmCmd)
 	}
+	return &TaskRunResult{true, out}, nil
+}
+
+func (task *HelmTaskv3) checkStatus(ctx context.Context) (*TaskRunResult, error) {
+	helmCmd := fmt.Sprintf("%s %s", TaskTypeHelmv3, task.status)
+	task.logger.With("canary", task.canary).Infof("running status command %v", helmCmd)
+
+	cmd := exec.CommandContext(ctx, TaskTypeHelm, strings.Fields(task.status)...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		task.logger.With("canary", task.canary).Errorf("status command failed %s %v %s", task.command, err, out)
+		return &TaskRunResult{false, out}, fmt.Errorf("status command %s failed: %s: %w", task.command, out, err)
+	} else {
+		if task.logCmdOutput {
+			fmt.Printf("%s\n", out)
+		}
+		task.logger.With("canary", task.canary).Infof("status command finished %v", helmCmd)
+	}
+
+	if !strings.Contains(string(out), "STATUS: deployed") {
+		return &TaskRunResult{false, out}, fmt.Errorf("status is not deployed")
+	}
+
 	return &TaskRunResult{true, out}, nil
 }
 
